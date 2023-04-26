@@ -1,0 +1,118 @@
+<div class="container">
+    <app-title-section [page]="'client'"></app-title-section>
+    <button class="button" (click)="onOpenSaveDialog()">Crear Cliente</button>
+    <div class="filter-section">
+        <label>Filtrar por cualquier campo</label>
+        <input type="text" id="fname" placeholder="Filtrar.." [(ngModel)]="filter" (keyup)="onFilter()">
+    </div>
+    <table>
+        <tr>
+            <th>Nombre</th>
+            <th>Genero</th>
+            <th>Edad</th>
+            <th>DNI</th>
+            <th>Dirección</th>
+            <th>Teléfono</th>
+            <th>Estado</th>
+            <th></th>
+          </tr>
+          <tr *ngFor="let client of filteredClients">
+            <td> {{client.name}} </td>
+            <td> {{client.gender}} </td>
+            <td> {{client.age}} </td>
+            <td> {{client.dni}} </td>
+            <td> {{client.address}} </td>
+            <td> {{client.phone}} </td>
+            <td> {{client.state}} </td>
+            <td class="actions">
+
+                <span class="material-symbols-outlined edit" (click)="onOpenEditDialog(client)">
+                    edit
+                </span>
+                
+                <span class="material-symbols-outlined delete" (click)="onOpenDeleteDialog(client)">
+                    delete
+                </span>
+
+            </td>
+          </tr>
+    </table>
+</div>
+
+<div #saveDialog id="saveDialog" class="dialog">
+
+    <div class="dialog-content" *ngIf="!loading && !saveDone">
+      <span class="close" (click)="onCloseSaveDialog()">&times;</span>
+      <h1 *ngIf="formType == 'post'">Crear Cliente</h1>
+      <h1 *ngIf="formType == 'put'">Actualizar Cliente</h1>
+
+      <form form [formGroup]="createForm">
+
+        <label>Nombre</label>
+        <input type="text" placeholder="Nombre" formControlName="name"  name="name" 
+        oninput="this.value = this.value.toUpperCase()">
+
+        <label>Genero</label>
+        <select formControlName="gender" name="gender" placeholder="Genero">
+            <option value="FEMALE">FEMENINO</option>
+            <option value="MALE">MASCULINO</option>
+            <option value="OTHER">OTRO</option>
+        </select>
+
+        <label>Edad</label>
+        <input type="number" placeholder="Edad" formControlName="age" name="age" min="10">
+
+        <label>DNI</label>
+        <input type="text" placeholder="DNI" formControlName="dni"  name="dni" 
+        oninput="this.value = this.value.toUpperCase()">
+
+        <label>Dirección</label>
+        <input type="text" placeholder="Dirección" formControlName="address"  name="address" 
+        oninput="this.value = this.value.toUpperCase()">
+
+        <label>Teléfono</label>
+        <input type="text" placeholder="Teléfono" formControlName="phone"  name="phone">
+
+        <label>Contraseña</label>
+        <input type="password" placeholder="Contraseña" formControlName="password"  name="password">
+
+        <label>Estado</label>
+        <select formControlName="state" name="state" placeholder="Estado">
+            <option [value]="true">TRUE</option>
+            <option [value]="false">FALSE</option>
+        </select>
+
+        <button (click)="onSaveClient()" class="submitButton" *ngIf="formType == 'post'" [disabled]="!createForm.valid">CREAR</button>
+        <button (click)="onUpdateClient()" class="submitButton" *ngIf="formType == 'put'" [disabled]="!createForm.valid">ACTUALIZAR</button>
+    </form>
+    </div>
+
+    <div class="dialog-content" *ngIf="loading">
+        <app-loading></app-loading>
+    </div>
+  
+    <div class="dialog-content" *ngIf="saveDone">
+        <span class="close" (click)="onCloseSaveDialog()">&times;</span>
+        <h2> {{message}} </h2>
+    </div>
+</div>
+
+<div #deleteDialog id="deleteDialog" class="dialog">
+    
+
+    <div class="dialog-content" *ngIf="!loading && !deleteDone">
+        <span class="close" (click)="onCloseDeleteDialog()">&times;</span>
+        <h2>¿Está seguro de eliminar al cliente {{selectedUser != null? selectedUser.name: 'null' }}?</h2>
+        <div class="actions">
+            <button (click)="onCloseDeleteDialog()">Cancelar</button>
+            <button class="eliminar" (click)="onDeleteClient()">Eliminar</button>
+        </div>
+    </div>
+    <div class="dialog-content" *ngIf="loading">
+        <app-loading></app-loading>
+    </div>
+    <div class="dialog-content" *ngIf="!loading && deleteDone">
+        <span class="close" (click)="onCloseDeleteDialog()">&times;</span>
+        <h2>{{message}}</h2>
+    </div>
+</div>

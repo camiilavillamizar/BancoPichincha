@@ -1,0 +1,59 @@
+<div class="container">
+    <app-title-section [page]="'report'"></app-title-section>
+
+    <p>Por favor seleccione un rango de fechas y un cliente para generar el informe.</p>
+
+    <div class="inputs">
+        <div class="input-div">
+            <label>Fecha inicio</label>
+            <input class="report-input" type="date" [(ngModel)]="startDate">
+        </div>
+    
+        <div class="input-div">
+            <label>Fecha Fin</label>
+            <input class="report-input" type="date" [(ngModel)]="endDate" placeholder="Fecha fin">
+        </div>
+    
+        <div class="input-div ">
+            <label>Cliente</label>
+            <select [(ngModel)]="clientId" class="report-input clients">
+                <option *ngFor="let client of clients" [value]="client.id"> {{client.name}} </option>
+            </select>
+        </div>
+    </div>
+
+    <div class="buttons">
+        <button class="report-button" [disabled]="disableShow()" (click)="onShow()">Mostrar informe</button>
+        <button class="report-button" [disabled]="disableDownload()" (click)="onDownload()">Descargar informe</button>
+    </div>
+   
+    <table *ngIf="showTable" class="report-table">
+        <tr>
+            <th>Fecha</th>
+            <th>Cliente</th>
+            <th>No. Cuenta</th>
+            <th>Tipo cuenta</th>
+            <th>Tipo Mov.</th>
+            <th>Saldo inicial</th>
+            <th>Estado cuenta</th>
+            <th>Valor </th>
+            <th>Saldo disponible</th>
+
+          </tr>
+          <tr *ngFor="let report of filteredReports">
+            <td> {{report.date}} </td>
+            <td> {{report.clientName}} </td>
+            <td> {{report.accountNumber}} </td>
+            <td> {{report.accountType}} </td>
+            <td> {{report.transactionType}} </td>
+            <td> {{report.initialBalance | currency}} </td>
+            <td> {{report.accountState}} </td>
+            <td> {{report.transactionAmount | currency}} </td>
+            <td> {{report.transactionBalance | currency}} </td>
+
+          </tr>
+    </table>
+    <div *ngIf="filteredReports.length == 0">
+        No hay datos disponibles
+    </div>
+</div>

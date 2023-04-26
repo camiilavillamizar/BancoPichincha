@@ -1,0 +1,161 @@
+:host {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    font-size: 14px;
+    color: #333;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+
+.container{
+    width: 100%;
+}
+
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin: 8px 0;
+    text-align: center;
+}
+
+p {
+    margin: 0;
+}
+
+.spacer {
+    flex: 1;
+}
+
+.fa-2x {
+    font-size: 2em;
+}
+
+.fa {
+    position: relative;
+    display: table-cell;
+    width: 60px;
+    height: 36px;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 20px;
+}
+
+.toolbar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    color: white;
+    font-weight: 600;
+    background-color: rgb(218, 217, 217);
+}
+
+.toolbar img {
+    margin: 1% 16px;
+    width: 180px;
+    cursor: pointer;
+}
+
+.arrowItem {
+    transform: scale(0.6);
+}
+
+.main-menu {
+    border-right: 1px solid #e5e5e5;
+    position: absolute;
+    bottom: 0;
+    height: calc(100% - 60px);
+    left: 0;
+    width: 20%;
+    overflow: hidden;
+    z-index: 1000;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.content {
+    display: flex;
+    margin: 82px auto 32px;
+    padding: 0 16px;
+    max-width: 960px;
+    flex-direction: column;
+    align-items: center;
+}
+.page{
+    width: 80%;
+    position: absolute;
+    right: 0;
+    margin-top: -30px;
+}
+svg.material-icons {
+    height: 24px;
+    width: auto;
+}
+
+svg.material-icons:not(:last-child) {
+    margin-right: 8px;
+}
+
+a {
+    text-decoration: none;
+}
+
+.card svg.material-icons path {
+    fill: white;
+}
+
+.material-symbols-outlined {
+    margin: 0 5px;
+}
+
+.card-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 16px;
+}
+
+.card {
+    border-radius: 4px;
+    border: 1px solid #eee;
+    background-color: #1b2458;
+    height: 40px;
+    width: 90%;
+    padding: 16px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.2s ease-in-out;
+    line-height: 24px;
+    color: white;
+    cursor: pointer;
+}
+.card:first-child{
+    margin-top: 10px;
+}
+
+.card:hover {
+    transform: scale(1.2);
+    background-color: #1b2458;
+    color: #e6ebf1;
+}
+
+svg#clouds {
+    position: fixed;
+    bottom: -160px;
+    left: -230px;
+    z-index: -10;
+    width: 1920px;
+}

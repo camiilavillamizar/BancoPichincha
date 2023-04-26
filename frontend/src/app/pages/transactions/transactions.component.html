@@ -1,0 +1,106 @@
+<div class="container">
+    <app-title-section [page]="'transaction'"></app-title-section>
+
+    <button class="button" (click)="onOpenSaveDialog()">Crear Movimiento</button>
+    <div class="filter-section">
+        <label>Filtrar por cualquier campo</label>
+        <input type="text" id="fname" placeholder="Filtrar.." [(ngModel)]="filter" (keyup)="onFilter()">
+    </div>
+    <table>
+        <tr>
+            <th>Cliente</th>
+            <th>Fecha</th>
+            <th>No. Cuenta</th>
+            <th>Tipo cuenta</th>
+            <th>Tipo Transacción</th>
+            <th>Valor</th>
+            <th>Saldo disponible</th>
+            <th></th>
+          </tr>
+          <tr *ngFor="let transacion of filteredTransactions">
+            <td> {{transacion.account.clientName}} </td>
+            <td> {{transacion.date | date: 'yyyy/MM/dd HH:mm:ss'}} </td>
+            <td> {{transacion.account.number}} </td>
+            <td> {{transacion.account.type}} </td>
+            <td> {{transacion.type}} </td>
+            <td> {{transacion.amount | currency}} </td>
+            <td> {{transacion.balance | currency}} </td>
+
+            <td class="actions">
+
+                <span class="material-symbols-outlined edit" (click)="onOpenEditDialog(transacion)">
+                    edit
+                </span>
+                
+                <span class="material-symbols-outlined delete" (click)="onOpenDeleteDialog(transacion)">
+                    delete
+                </span>
+
+            </td>
+          </tr>
+    </table>
+</div>
+
+<div #saveDialog id="saveDialog" class="dialog">
+    <div class="dialog-content" *ngIf="!loading && !saveDone">
+        <span class="close" (click)="onCloseSaveDialog()">&times;</span>
+
+        <h1 *ngIf="formType == 'post'">Crear Movimiento</h1>
+        <h1 *ngIf="formType == 'put'">Actualizar Movimiento</h1>
+  
+        <form form [formGroup]="form">
+            
+            <label>Cuenta</label>
+            <select *ngIf="formType == 'post'" placeholder="Cuenta" formControlName="account" name="account">
+                <option *ngFor="let account of accounts" [value]="account.id"> {{account.clientName}} - {{account.number}} ({{account.type}}) </option>
+            </select>
+            <input *ngIf="formType == 'put'" placeholder="Cuenta" formControlName="account" name="account">
+    
+            <label>Fecha</label>
+            <input   *ngIf="formType == 'post'" placeholder="Fecha" type="datetime-local" formControlName="date" name="date">
+            <input  *ngIf="formType == 'put'" placeholder="Fecha" type="datetime-local" formControlName="date" name="date" readonly>
+
+            <label>Valor</label>
+            <input placeholder="Valor" formControlName="amount" name="amount" (blur)="transformAmount()">
+
+            <label>Tipo de Transacción</label>
+            <select formControlName="type" name="type" placeholder="Tipo de transacción" *ngIf="formType == 'post'">
+                <option value="CREDITO">CREDITO</option>
+                <option value="DEBITO">DEBITO</option>
+            </select>
+            <input *ngIf="formType == 'put'" placeholder="Tipo de transacción" formControlName="type" name="type">
+    
+            <button (click)="onSaveTransaction()" class="submitButton" *ngIf="formType == 'post'" [disabled]="!form.valid">CREAR</button>
+            <button (click)="onUpdateTransaction()" class="submitButton" *ngIf="formType == 'put'" [disabled]="!form.valid">ACTUALIZAR</button>
+   
+        </form>
+    </div>
+    <div class="dialog-content" *ngIf="loading">
+        <app-loading></app-loading>
+    </div>
+  
+    <div class="dialog-content" *ngIf="saveDone">
+        <span class="close" (click)="onCloseSaveDialog()">&times;</span>
+        <h2> {{message}} </h2>
+    </div>
+
+</div>
+
+<div #deleteDialog id="deleteDialog" class="dialog">
+    
+    <div class="dialog-content" *ngIf="!loading && !deleteDone">
+        <span class="close" (click)="onCloseDeleteDialog()">&times;</span>
+        <h2>¿Está seguro de eliminar la transacción por valor de {{selectedTransaction != null? selectedTransaction.amount: 'null' }}?</h2>
+        <div class="actions">
+            <button (click)="onCloseDeleteDialog()">Cancelar</button>
+            <button class="eliminar" (click)="onDeleteTransaction()">Eliminar</button>
+        </div>
+    </div>
+    <div class="dialog-content" *ngIf="loading">
+        <app-loading></app-loading>
+    </div>
+    <div class="dialog-content" *ngIf="!loading && deleteDone">
+        <span class="close" (click)="onCloseDeleteDialog()">&times;</span>
+        <h2>{{message}}</h2>
+    </div>
+</div>

@@ -1,0 +1,165 @@
+/* You can add global styles to this file, and also import other style files */
+button {
+    background-color: #1b2458;
+    box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px,
+        rgba(0, 0, 0, 0.17) 0px 12px 13px,
+        rgba(0, 0, 0, 0.09) 0px -3px 5px;
+    border-radius: 30px;
+    padding: 2px;
+    color: white;
+    width: 160px;
+    height: 30px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all .5s;
+}
+
+h2 {
+    text-align: center;
+    font-family: 'Raleway', sans-serif;
+}
+
+button:disabled {
+    background-color: gray;
+}
+
+button:hover:enabled {
+    transform: translateY(-1px);
+    background-color: #111b53;
+}
+
+table {
+    font-family: Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+table td,
+table th {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+table tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+table tr:hover {
+    background-color: #ddd;
+}
+
+table th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #111b53;
+    color: white;
+}
+
+.edit {
+    color: rgb(248, 197, 57);
+    cursor: pointer;
+    transition: all .3s;
+    border-radius: 20px;
+}
+
+.delete {
+    color: tomato;
+    cursor: pointer;
+    border-radius: 20px;
+}
+
+.edit:hover,
+.delete:hover {
+    box-shadow: 0 0 0 3px #afa8a6;
+    background-color: #afa8a6;
+}
+
+.actions {
+    display: flex;
+    justify-content: center;
+}
+
+input,
+select {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+input:invalid,
+.invalid-input {
+    border: 3px solid tomato;
+}
+input[type="datetime-local"]:invalid{
+    border: 1px solid #ccc;
+}
+
+.valid-input {
+    border: 1px solid #ccc;
+}
+
+.filter-section {
+    margin-top: 50px;
+}
+
+.dialog {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    padding-top: 100px;
+    right: 0;
+    top: 0;
+    width: 80%;
+    height: 100%;
+    overflow: auto;
+    border-radius: 30px;
+    background-color: rgb(0, 0, 0);
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.dialog-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+}
+
+.close {
+    color: #aaaaaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+.eliminar {
+    background-color: tomato;
+}
+
+.container {
+    margin: 0 10px;
+}
+
+.submitButton {
+    margin: 0 auto;
+}
+p{
+    font-family: 'Raleway', sans-serif;
+}

@@ -1,0 +1,12 @@
+h1{
+    font-family: 'Raleway', sans-serif;
+    font-size: 30px;
+    animation: colors 7s infinite;
+	text-align: center;
+}
+@keyframes colors{ 
+	0%{ color: black}
+	33%{color:#1b2458}
+	70%{color: rgb(255, 230, 88)}
+	100%{color: rgb(55, 20, 59)}
+}
