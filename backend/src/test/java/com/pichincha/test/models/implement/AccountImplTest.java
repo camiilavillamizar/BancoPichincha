@@ -1,8 +1,8 @@
-package com.pichincha.test.controllers;
+package com.pichincha.test.models.implement;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -10,9 +10,9 @@ import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -27,17 +27,17 @@ import com.pichincha.test.models.Dao.TransactionDao;
 import com.pichincha.test.models.Entity.Account;
 import com.pichincha.test.models.Entity.Client;
 import com.pichincha.test.models.Entity.Transaction;
-import com.pichincha.test.models.implement.AccountImpl;
-import com.pichincha.test.models.implement.ClientImpl;
 import com.pichincha.test.utils.enums.AccountType;
 import com.pichincha.test.utils.enums.Gender;
 import com.pichincha.test.utils.enums.TransactionType;
 
+
 @SpringBootTest
-public class AccountRestControllerTest {
+public class AccountImplTest {
 
 	@InjectMocks
 	AccountImpl accountService; 
+	
 	@Mock
 	AccountDao accountDao; 
 	@Mock
@@ -47,9 +47,6 @@ public class AccountRestControllerTest {
 	@Mock
 	TransactionDao transactionDao; 
 	
-	List<Account> accounts = new ArrayList<>(); 
-	Account accountA = new Account(); 
-	Account accountB = new Account(); 
 	
 	Client client = new Client(1, 
 			"Laura Perez",
@@ -61,34 +58,32 @@ public class AccountRestControllerTest {
 			"secret", 
 			true, 
 			new ArrayList());
+	Account accountA = new Account(1, new Long(102938), AccountType.AHORROS, 
+			BigDecimal.ZERO, true, client, new ArrayList<>());  
+	Account accountB = new Account(2, new Long(102939), AccountType.CORRIENTE, 
+			BigDecimal.ZERO, true, client, new ArrayList<>());  
+	List<Account> accounts =  Arrays.asList(accountA, accountB); 
+	
+	Transaction transactionA = new Transaction(1, LocalDateTime.now(), TransactionType.CREDITO, 
+			new BigDecimal(100), new BigDecimal(100), accountA); 
+	List<Transaction> transactions = Arrays.asList(transactionA); 
+	
 	
 	@BeforeEach()
 	void setUp() {
 		MockitoAnnotations.initMocks(this);
-		accountA = new Account(1, new Long(102938), AccountType.AHORROS, 
-				BigDecimal.ZERO, true, client, new ArrayList<>()); 
-		
-		accountB = new Account(2, new Long(102939), AccountType.CORRIENTE, 
-				BigDecimal.ZERO, true, client, new ArrayList<>()); 
-		
-		accounts.add(accountA); 
-		accounts.add(accountB); 
-		
+
 		when(accountDao.findAll()).thenReturn(accounts); 
 		when(accountDao.findById(1)).thenReturn(accountA); 
 		when(accountDao.findById(2)).thenReturn(accountB);
 		when(accountDao.save(Mockito.any(Account.class))).thenReturn(accountA);
 		when(clientDao.findById(1)).thenReturn(client); 
 		
-		List<Transaction> transactions = new ArrayList<>(); 
-		Transaction transactionA = new Transaction(1, LocalDateTime.now(), TransactionType.CREDITO, 
-				new BigDecimal(100), new BigDecimal(100), accountA); 
-		
-		transactions.add(transactionA); 
  
 		when(transactionDao.getByAccountId(1)).thenReturn(transactions); 
 		when(transactionDao.getByAccountId(2)).thenReturn(new ArrayList<>()); 
 		when(accountDao.findByNumber(new Long(102938))).thenReturn(accountA); 
+		when(accountDao.findByNumber(new Long(999999))).thenReturn(null); 
 	}
 	
 	@Test
@@ -107,10 +102,9 @@ public class AccountRestControllerTest {
 	void postTest() throws Exception {
 		Account accountC = new Account(1, new Long(102940), AccountType.CORRIENTE, 
 				BigDecimal.ZERO, true, client, new ArrayList<>()); 
+		when(accountDao.save(Mockito.any(Account.class))).thenReturn(accountC);
 		Account savedAccount = accountService.save(accountC);
-		
-		assertNotEquals(savedAccount, accountC);
-		assertEquals(savedAccount, accountA); 
+		assertEquals(accountC, savedAccount); 
 		verify(accountDao, times(1)).save(accountC); 
 	}
 	/**
@@ -128,9 +122,9 @@ public class AccountRestControllerTest {
 	void updateTest() throws Exception {
 		Account accountC = new Account(1, new Long(102930), AccountType.AHORROS, 
 				BigDecimal.ZERO, true, client, new ArrayList<>()); 
+		when(accountDao.save(Mockito.any(Account.class))).thenReturn(accountC);
 		Account savedAccount = accountService.update(accountC); 
-		assertNotEquals(accountC, savedAccount); 
-		assertEquals(savedAccount, accountA); 
+		assertEquals(accountC, savedAccount); 
 		verify(accountDao, times(1)).save(accountC); 
 	}
 	/**
@@ -154,5 +148,39 @@ public class AccountRestControllerTest {
 	void deleteTest2() throws Exception {
 		accountService.deleteById(accountB.getId());
 		verify(accountDao, times(1)).deleteById(accountB.getId());
+	}
+	
+	@Test
+	void checkIfExists() {	
+		assertThrows(Exception.class, () -> accountService.checkIfExists(5));
+		try {
+			accountService.checkIfExists(1);
+		} catch (Exception e) {
+			fail(); 
+		}
+		verify(accountDao, times(1)).findById(1); 
+	}
+	
+	@Test
+	void checkIfNumberIsValid() {
+		assertThrows(Exception.class, () -> accountService.checkIfNumberIsValid(accountA.getNumber()));
+		try {
+			accountService.checkIfNumberIsValid(new Long(999999));
+		}catch(Exception e) {
+			fail(); 
+		}
+		
+		verify(accountDao, times(1)).findByNumber(new Long(999999)); 
+	}
+	
+	@Test
+	void checkDontHaveTransactions() {
+		assertThrows(Exception.class, () -> accountService.checkDontHaveTransactions(accountA.getId()));
+		try {
+			accountService.checkDontHaveTransactions(accountB.getId());
+		} catch(Exception e) {
+			fail(); 
+		}
+		verify(transactionDao, times(1)).getByAccountId(accountB.getId()); 
 	}
 }
