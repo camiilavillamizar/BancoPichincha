@@ -9,11 +9,12 @@ public interface IClient {
 	//CRUD
 	public List<Client> getAll(); 
 	public Client getById(int id); 
-	public Client save(Client client); 
+	public Client save(Client client) throws Exception;
 	public Client update(Client client) throws Exception; 
 	public void deleteById(int id) throws Exception; 
 	
 	//FUNCTIONS
+	public void validateFields(Client client) throws Exception;
 	public void checkIfExists(int id) throws Exception;
 	public void checkDontHaveAccounts(int id)throws Exception;
 }

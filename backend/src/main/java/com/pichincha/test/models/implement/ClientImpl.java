@@ -35,13 +35,15 @@ public class ClientImpl implements IClient{
 	}
 
 	@Override
-	public Client save(Client client) {
+	public Client save(Client client) throws Exception{
+		validateFields(client); 
 		return clientDao.save(client); 
 	}
 
 	@Override
 	public Client update(Client client) throws Exception {
 		checkIfExists(client.getId()); 
+		validateFields(client);
 		return clientDao.save(client);
 	}
 
@@ -53,6 +55,18 @@ public class ClientImpl implements IClient{
 	}
 
 	//----------OTHER FUNCTIONS
+	@Override
+	public void validateFields(Client client) throws Exception{
+		
+		if(client.getPassword().length() == 0) throw new Exception("INVALID PASSWORD"); 
+		if(client.getName().length() == 0 ) throw new Exception("INVALID NAME"); 
+		if(client.getAge() < 0 || client.getAge() > 110) throw new Exception("INVALID AGE"); 
+		if(client.getDni().length() == 0) throw new Exception("INVALID DNI"); 
+		if(client.getAddress().length() == 0) throw new Exception("INVALID ADDRESS"); 
+		if(client.getPhone().length() < 7) throw new Exception("INVALID PHONE");
+		
+	}
+	
 	@Override
 	public void checkIfExists(int id) throws Exception {
 		

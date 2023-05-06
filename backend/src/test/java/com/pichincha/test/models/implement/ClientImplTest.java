@@ -1,8 +1,10 @@
 package com.pichincha.test.models.implement;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -12,6 +14,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -66,69 +69,188 @@ public class ClientImplTest {
 	}
 	
 	@Test
-	void getAllTest() {
+	void testGetAllWithData() {
 		List<Client> actualClients = clientService.getAll(); 
-		assertEquals(actualClients, clients); 
+		assertEquals("Clients must be equals", actualClients, clients); 
 		assertSame(clients, clientService.getAll());
 	}
+
+	
 	@Test
-	void getByIdTest() {
+	void testGetByExistingClient() {
 		Client client = clientService.getById(1); 
-		assertEquals(client.getName(), "Laura Perez");
+		assertEquals("Name must be Laura Perez", client.getName(), "Laura Perez");
+		assertEquals("Age must be 24", client.getAge(), 24);
+		assertEquals("State must be True", client.isState(), true); 
 		
 	}
 	@Test
-	void postTest() {
+	void testGetUnexistingClient() {
+		when(clientDao.findById(3)).thenReturn(null);
+		Client client = clientService.getById(3); 
+		assertNull("Client must be null", client); 
+	}
+	
+	@Test
+	void testSaveClient() {
 		
 		Client clientC = new Client(3, "Jairo Serrano",Gender.MALE,30,"1392388492",
 				"Bogotá, calle 82 # 90 -53","(+57) 3275392001","secret", true, new ArrayList()); 
 		when(clientDao.save(Mockito.any(Client.class))).thenReturn(clientC); 
-		assertEquals(clientService.save(clientC), clientC);
+		try {
+			assertEquals(clientService.save(clientC), clientC);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			fail("Should save client with correct fields"); 
+		}
 		verify(clientDao, times(1)).save(clientC); 
 	}
+	
 	@Test
-	void updateTest() throws Exception {
+	void testSaveClient_wrongData() {
+		
+		Client clientC = new Client(3, "Jairo Serrano",Gender.MALE,30,"1392388492",
+				"Bogotá, calle 82 # 90 -53","(+57) 3275392001","", true, new ArrayList()); 
+		when(clientDao.save(Mockito.any(Client.class))).thenReturn(clientC); 
+		
+		assertThrows("Must return an exception", Exception.class, () -> { clientService.save(clientC); });
+		verify(clientDao, times(0)).save(clientC); 
+	}
+	
+	@Test
+	void testUpdateClient() throws Exception {
 		Client clientC = new Client(1, "Laura Perez",Gender.FEMALE,24,"103982723",
 				"Bogotá, calle 151 # 20 -59a","(+57) 319203402","secret2", true, new ArrayList()); 
 		when(clientDao.save(Mockito.any(Client.class))).thenReturn(clientC); 
 		assertEquals(clientC, clientService.update(clientC));
 		verify(clientDao, times(1)).save(clientC); 
 	}
-
-	/**
-	 * Can't delete client if has accounts
-	 * @throws Exception
-	 */
-	@Test
-	void deleteTest() throws Exception {
-		assertThrows(Exception.class, () -> clientService.deleteById(clientA.getId()));
-	}
 	
 	@Test
-	void deleteTest2() throws Exception {
+	void testUpdateClient_wrongData() {
+		Client clientC = new Client(1, "Laura Perez",Gender.FEMALE,24,"103982723",
+				"Bogotá, calle 151 # 20 -59a","(+57) 319203402","", true, new ArrayList()); 
+		when(clientDao.save(Mockito.any(Client.class))).thenReturn(clientC); 
+		assertThrows("Must return an exception", Exception.class, () -> { clientService.update(clientC); });
+		verify(clientDao, times(0)).save(clientC); 
+	}
+
+	
+	@Test
+	void testDelete_existingClient() throws Exception {
 		clientService.deleteById(clientB.getId());
 		verify(clientDao, times(1)).deleteById(clientB.getId()); 
 	}
 	
 	@Test
-	void checkIfExists() {	
-		assertThrows(Exception.class, () -> clientService.checkIfExists(5));
-		try {
-			clientService.checkIfExists(1);
-		} catch (Exception e) {
-			fail(); 
-		}
-		verify(clientDao, times(1)).findById(1); 
+	void testDelete_unexistingClient() throws Exception{
+		when(clientDao.findById(3)).thenReturn(null);
+		Exception exception = assertThrows("Must return an exception", Exception.class, () -> clientService.deleteById(3)); 
+		assertTrue("Exception must say client does not exist", exception.getMessage().contains("does not exist")); 
+		
+	}
+	
+	/**
+	 * Can't delete client if has accounts
+	 * @throws Exception
+	 */
+	@Test
+	void testDelete_clientWithAccounts() throws Exception {
+		Exception exception = assertThrows("Must throw exception",Exception.class, () -> clientService.deleteById(clientA.getId()));
+		assertTrue("Exception must be client has accounts", exception.getMessage().contains("HAS ACCOUNTS")); 
 	}
 	
 	@Test
-	void checkDontHaveAccounts() {
-		assertThrows(Exception.class, () -> clientService.checkDontHaveAccounts(1));
+	void testValidateFields_wrongPassword() {
+		Client clientC = new Client(3, "Jairo Serrano",Gender.MALE,30,"1392388492",
+				"Bogotá, calle 82 # 90 -53","(+57) 3275392001","", true, new ArrayList()); 
+		Exception exception = assertThrows("Must throw exception", Exception.class , () -> {
+			clientService.validateFields(clientC);			
+		});
+		
+		assertTrue("Must be invalid password exception", exception.getMessage().equals("INVALID PASSWORD")); 
+	}
+	
+	@Test
+	void testValidateFields_wrongName() {
+		Client clientC = new Client(3, "",Gender.MALE,30,"1392388492",
+				"Bogotá, calle 82 # 90 -53","(+57) 3275392001","1234", true, new ArrayList()); 
+		Exception exception = assertThrows("Must throw exception", Exception.class , () -> {
+			clientService.validateFields(clientC);			
+		});
+		
+		assertTrue("Must be invalid name exception", exception.getMessage().equals("INVALID NAME")); 
+	}
+	@Test
+	void testValidateFields_wrongAge() {
+		Client clientC = new Client(3, "Jairo Serrano",Gender.MALE,-30,"1392388492",
+				"Bogotá, calle 82 # 90 -53","(+57) 3275392001","1234", true, new ArrayList()); 
+		Exception exception = assertThrows("Must throw exception", Exception.class , () -> {
+			clientService.validateFields(clientC);			
+		});
+		
+		assertTrue("Must be invalid age exception", exception.getMessage().equals("INVALID AGE")); 
+	}
+	
+	@Test
+	void testValidateFields_wrongDni() {
+		Client clientC = new Client(3, "Jairo Serrano",Gender.MALE,30,"",
+				"Bogotá, calle 82 # 90 -53","(+57) 3275392001","1234", true, new ArrayList()); 
+		Exception exception = assertThrows("Must throw exception", Exception.class , () -> {
+			clientService.validateFields(clientC);			
+		});
+		assertTrue("Must be invalid dni exception", exception.getMessage().equals("INVALID DNI")); 
+	}
+	
+	@Test
+	void testValidateFields_wrongAdress() {
+		Client clientC = new Client(3, "Jairo Serrano",Gender.MALE,30,"1392388492",
+				"","(+57) 3275392001","1234", true, new ArrayList()); 
+		Exception exception = assertThrows("Must throw exception", Exception.class , () -> {
+			clientService.validateFields(clientC);			
+		});
+		assertTrue("Must be invalid address exception", exception.getMessage().equals("INVALID ADDRESS")); 
+	}
+	
+	@Test
+	void testValidateFields_wrongPhone() {
+		Client clientC = new Client(3, "Jairo Serrano",Gender.MALE,30,"1392388492",
+				"Bogotá, calle 82 # 90 -53","(+57)","1234", true, new ArrayList()); 
+		Exception exception = assertThrows("Must throw exception", Exception.class , () -> {
+			clientService.validateFields(clientC);			
+		});
+		assertTrue("Must be invalid phone exception", exception.getMessage().equals("INVALID PHONE")); 
+	}
+	
+	@Test
+	void checkIfExists_existingClient() {
+		try {
+			clientService.checkIfExists(1);
+			verify(clientDao, times(1)).findById(1); 
+		} catch (Exception e) {
+			fail("Must pass findById function"); 
+		}
+	}
+	
+	@Test
+	void checkIfExists_unexistingClient() {
+		when(clientDao.findById(5)).thenReturn(null); 
+		assertThrows(Exception.class, () -> clientService.checkIfExists(5));
+	}
+	
+	@Test
+	void checkDontHaveAccounts_clientWithAccounts() {
+		Exception exception = assertThrows("Must throw exception", Exception.class, () -> clientService.checkDontHaveAccounts(1)); 
+		assertTrue("Exception must be has accounts", exception.getMessage().contains("HAS ACCOUNTS")); 
+	}
+	@Test
+	void checkDontHaveAccounts_clientWithoutAccounts() {
 		try {
 			clientService.checkDontHaveAccounts(2);
+			verify(accountDao, times(1)).getByClientId(2);
 		} catch (Exception e) {
-			fail(); 
+			fail("Must do not throw any exception"); 
 		}
-		verify(accountDao, times(1)).getByClientId(1); 
 	}
+
 }
