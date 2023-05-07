@@ -1,6 +1,7 @@
 package com.pichincha.test.controllers;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -64,8 +65,13 @@ public class ReportRestControllerTest {
 	@Test
 	void getReportTest() {
 		
-		List<ReportDto> actualReports = reportService.getReporByClientBtwnDates("20230303", "20230501", 1); 
-		assertEquals(reports, actualReports);
+		List<ReportDto> actualReports;
+		try {
+			actualReports = reportService.getReporByClientBtwnDates("20230303", "20230501", 1);
+			assertEquals(reports, actualReports);
+		} catch (Exception e) {
+			fail("Must do not throw any exception"); 
+		} 
 	}
 	
 	@Test
