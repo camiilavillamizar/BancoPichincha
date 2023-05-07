@@ -1,5 +1,6 @@
 package com.pichincha.test.models.implement;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +53,7 @@ public class AccountImpl implements IAccount{
 	@Override
 	public Account save(Account account) throws Exception {
 		clientService.checkIfExists(account.getClient().getId());
+		checkValidFields(account);
 		checkIfNumberIsValid(account.getNumber()); 
 		return accountDao.save(account); 
 	}
@@ -62,6 +64,10 @@ public class AccountImpl implements IAccount{
 		Account actualAccount = getById(account.getId()); 
 		if(!actualAccount.getNumber().equals(account.getNumber())) {
 			checkIfNumberIsValid(account.getNumber()); 			
+		}
+		checkValidFields(account);
+		if(actualAccount.getTransactions().size() != 0 && account.getBalance().compareTo(actualAccount.getBalance()) != 0) {
+			throw new Exception("CAN'T EDIT BALANCE, ACCOUNT HAS TRANSACTIONS"); 
 		}
 		return accountDao.save(account);
 	}
@@ -80,6 +86,12 @@ public class AccountImpl implements IAccount{
 			throw new Exception("Account "+ id + " does not exist"); 
 		
 	}
+	
+	public void checkValidFields(Account account) throws Exception{
+		if(account.getNumber() < 0) throw new Exception("INVALID NUMBER"); 
+		if(account.getBalance().compareTo(BigDecimal.ZERO) < 0) throw new Exception("INVALID BALANCE"); 
+		
+	}
 
 	@Override
 	public void checkIfNumberIsValid(Long number) throws Exception {
@@ -92,7 +104,7 @@ public class AccountImpl implements IAccount{
 	@Override
 	public void checkDontHaveTransactions(int id) throws Exception {
 		if(transactionDao.getByAccountId(id).size() != 0) {
-			throw new Exception("ACCOUNT " + id + " HAVE TRANSACTIONS"); 
+			throw new Exception("ACCOUNT " + id + " HAS TRANSACTIONS"); 
 		}
 		
 	}

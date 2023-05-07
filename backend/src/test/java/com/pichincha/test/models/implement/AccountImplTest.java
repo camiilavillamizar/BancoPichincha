@@ -1,7 +1,9 @@
 package com.pichincha.test.models.implement;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -73,6 +75,7 @@ public class AccountImplTest {
 	void setUp() {
 		MockitoAnnotations.initMocks(this);
 
+		accountA.setTransactions(transactions);
 		when(accountDao.findAll()).thenReturn(accounts); 
 		when(accountDao.findById(1)).thenReturn(accountA); 
 		when(accountDao.findById(2)).thenReturn(accountB);
@@ -87,44 +90,66 @@ public class AccountImplTest {
 	}
 	
 	@Test
-	void getAllTest() {
+	void testGetAll() {
 		List<Account> actualAccounts = accountService.getAll(); 
-		assertEquals(accounts, actualAccounts);
+		assertEquals("Accounts must be equals", accounts, actualAccounts);
 	}
 	
 	@Test
-	void getByIdTest() {
+	void testGetById_existingAccount() {
 		Account account = accountService.getById(1); 
 		assertEquals(accountA, account);
 	}
 	
 	@Test
-	void postTest() throws Exception {
+	void testGetById_unexistingAccount() {
+		when(accountDao.findById(3)).thenReturn(null); 
+		Account account = accountService.getById(3); 
+		assertNull(account); 
+	}
+	
+	@Test
+	void testSave_newAccount() {
 		Account accountC = new Account(1, new Long(102940), AccountType.CORRIENTE, 
 				BigDecimal.ZERO, true, client, new ArrayList<>()); 
 		when(accountDao.save(Mockito.any(Account.class))).thenReturn(accountC);
-		Account savedAccount = accountService.save(accountC);
-		assertEquals(accountC, savedAccount); 
-		verify(accountDao, times(1)).save(accountC); 
+		try {
+			Account savedAccount = accountService.save(accountC);
+			assertEquals(accountC, savedAccount); 
+			verify(accountDao, times(1)).save(accountC); 
+		} catch (Exception e) {
+			fail("Must do not throw any exception"); 
+		}
+	}
+
+	@Test
+	void testSave_wrongFields() {
+		Account accountC = new Account(1, new Long(-102940), AccountType.CORRIENTE, 
+				BigDecimal.ZERO, true, client, new ArrayList<>()); 
+		Exception exception = assertThrows("Must throw an exception", Exception.class, () -> accountService.save(accountC)); 
+		assertTrue("Must be an invalid number exception", exception.getMessage().equals("INVALID NUMBER"));  
 	}
 	/**
 	 * Can't save if account number already exists
 	 * @throws Exception
 	 */
 	@Test
-	void saveTest2() throws Exception {
+	void testSave_existingAccountNumber() throws Exception {
 		Account accountC = new Account(3, new Long(102938), AccountType.AHORROS, 
 				BigDecimal.ZERO, true, client, new ArrayList<>()); 
 		
-		assertThrows(Exception.class, () -> accountService.save(accountC));
+		Exception exception = assertThrows(Exception.class, () -> accountService.save(accountC));
+		assertTrue("Exception must be account number already exists", exception.getMessage().equals("ACCOUNT NUMBER ALREADY EXISTS")); 
+		
 	}
+	
 	@Test
-	void updateTest() throws Exception {
+	void testUpdate_exixtingAccount() throws Exception {
 		Account accountC = new Account(1, new Long(102930), AccountType.AHORROS, 
 				BigDecimal.ZERO, true, client, new ArrayList<>()); 
 		when(accountDao.save(Mockito.any(Account.class))).thenReturn(accountC);
 		Account savedAccount = accountService.update(accountC); 
-		assertEquals(accountC, savedAccount); 
+		assertEquals("Must be same account", accountC, savedAccount); 
 		verify(accountDao, times(1)).save(accountC); 
 	}
 	/**
@@ -132,55 +157,89 @@ public class AccountImplTest {
 	 * @throws Exception
 	 */
 	@Test
-	void updateTest2() throws Exception {
+	void testUpdate_accountWithExistingNumber() throws Exception {
 		Account accountC = new Account(2, new Long(102938), AccountType.AHORROS, 
 				BigDecimal.ZERO, true, client, new ArrayList<>()); 
 		
-		assertThrows(Exception.class, () -> accountService.update(accountC)); 
+		Exception exception = assertThrows("Must throw exception", Exception.class, () -> accountService.update(accountC)); 
+		assertTrue("Exception must be account number already exists", exception.getMessage().equals("ACCOUNT NUMBER ALREADY EXISTS")); 
 	}
 	
 	@Test
-	void deleteTest() throws Exception {
-		assertThrows(Exception.class, () -> accountService.deleteById(accountA.getId()));
+	void testUpdate_unexistingAccount() {
+		Account accountC = new Account(5, new Long(102930), AccountType.AHORROS, 
+				BigDecimal.ZERO, true, client, new ArrayList<>()); 
+		when(accountDao.findById(5)).thenReturn(null); 
+		Exception exception = assertThrows("Must return an exception", Exception.class, () -> accountService.update(accountC)); 
+		assertTrue("Must throw not found account", exception.getMessage().contains("does not exist")); 
 	}
 	
 	@Test
-	void deleteTest2() throws Exception {
+	void testUpdate_changeBalanceWithTransactions() {
+		Account updatedAccountA = new Account(1, new Long(1000), AccountType.AHORROS, 
+				new BigDecimal(100), true, client, new ArrayList<>());
+		Exception exception = assertThrows("Must return an exception", Exception.class, () -> accountService.update(updatedAccountA)); 
+		assertTrue("Exception must be account has transactions", exception.getMessage().contains("HAS TRANSACTIONS")); 
+	}
+	@Test
+	void testDelete_accountWithTransactions() throws Exception {
+		Exception exception = assertThrows(Exception.class, () -> accountService.deleteById(accountA.getId()));
+		assertTrue("Exception must be accoubt has transactions", exception.getMessage().contains("HAS TRANSACTIONS")); 
+	}
+	
+	@Test
+	void testDelete_accountWithoutTransactions() throws Exception {
 		accountService.deleteById(accountB.getId());
 		verify(accountDao, times(1)).deleteById(accountB.getId());
 	}
 	
 	@Test
-	void checkIfExists() {	
-		assertThrows(Exception.class, () -> accountService.checkIfExists(5));
-		try {
-			accountService.checkIfExists(1);
-		} catch (Exception e) {
-			fail(); 
-		}
-		verify(accountDao, times(1)).findById(1); 
+	void testCheckIfExists_unexistingAccount() {	
+		when(accountDao.findById(5)).thenReturn(null); 
+		Exception exception = assertThrows(Exception.class, () -> accountService.checkIfExists(5));
+		assertTrue("Exception must be does not exist", exception.getMessage().contains("does not exist")); 
 	}
 	
 	@Test
-	void checkIfNumberIsValid() {
-		assertThrows(Exception.class, () -> accountService.checkIfNumberIsValid(accountA.getNumber()));
+	void testCheckIfExists_existingAccount() {
+		try {
+			accountService.checkIfExists(1);
+			verify(accountDao, times(1)).findById(1); 
+		} catch (Exception e) {
+			fail("Must doesn't throw an exception"); 
+		}
+	}
+	
+	@Test
+	void testCheckIfNumberValid_validNumber() {
 		try {
 			accountService.checkIfNumberIsValid(new Long(999999));
+			verify(accountDao, times(1)).findByNumber(new Long(999999)); 
 		}catch(Exception e) {
-			fail(); 
+			fail("Must do not have exceptions"); 
 		}
 		
-		verify(accountDao, times(1)).findByNumber(new Long(999999)); 
+		
+	}
+	@Test
+	void testCheckIfNumberValid_invalidNumber() {
+		Exception exception = assertThrows(Exception.class, () -> accountService.checkIfNumberIsValid(accountA.getNumber()));
+		assertTrue("Must throw account number already exists", exception.getMessage().equals("ACCOUNT NUMBER ALREADY EXISTS"));
+	}
+	
+	@Test
+	void testCheckDontHaveTransactions_withTransactions() {
+		 Exception exception = assertThrows(Exception.class, () -> accountService.checkDontHaveTransactions(accountA.getId()));
+		 assertTrue("Must throw account has transactions exception",exception.getMessage().contains("HAS TRANSACTIONS"));
 	}
 	
 	@Test
 	void checkDontHaveTransactions() {
-		assertThrows(Exception.class, () -> accountService.checkDontHaveTransactions(accountA.getId()));
 		try {
 			accountService.checkDontHaveTransactions(accountB.getId());
+			verify(transactionDao, times(1)).getByAccountId(accountB.getId());
 		} catch(Exception e) {
-			fail(); 
+			fail("Must do not throw exception"); 
 		}
-		verify(transactionDao, times(1)).getByAccountId(accountB.getId()); 
 	}
 }

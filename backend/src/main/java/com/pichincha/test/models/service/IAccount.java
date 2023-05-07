@@ -17,6 +17,7 @@ public interface IAccount {
 	
 	//FUNCTIONS
 	public void checkIfExists(int id) throws Exception;
+	public void checkValidFields(Account account) throws Exception; 
 	public void checkIfNumberIsValid(Long number) throws Exception;
 	public void checkDontHaveTransactions(int id) throws Exception;
 }
