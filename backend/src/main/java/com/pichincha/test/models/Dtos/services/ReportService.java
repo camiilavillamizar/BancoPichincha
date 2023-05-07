@@ -29,6 +29,7 @@ public class ReportService {
 		startDate = startDate.replace("-", "");
 		
 		if(Integer.valueOf(endDate) > Integer.valueOf(today)) throw new Exception ("INVALID END DATE"); 
+		if(Integer.valueOf(startDate) > Integer.valueOf(today)) throw new Exception ("INVALID START DATE"); 
 		if(Integer.valueOf(endDate) < Integer.valueOf(startDate)) throw new Exception ("END DATE MUST BE GREATER THAN START DATE"); 
 	}
 	
