@@ -6,12 +6,13 @@
     <div class="inputs">
         <div class="input-div">
             <label>Fecha inicio</label>
-            <input class="report-input" type="date" [(ngModel)]="startDate">
+            <input class="report-input" type="date" [(ngModel)]="startDate" [max]="getCurrentDate()">
         </div>
     
         <div class="input-div">
             <label>Fecha Fin</label>
-            <input class="report-input" type="date" [(ngModel)]="endDate" placeholder="Fecha fin">
+            <input class="report-input" type="date" [(ngModel)]="endDate" placeholder="Fecha fin"
+            [disabled]="!startDate" [max]="getCurrentDate()" [min]="startDate">
         </div>
     
         <div class="input-div ">
@@ -48,7 +49,7 @@
             <td> {{report.transactionType}} </td>
             <td> {{report.initialBalance | currency}} </td>
             <td> {{report.accountState}} </td>
-            <td> {{report.transactionAmount | currency}} </td>
+            <td [ngClass]="{'red': report.transactionAmount < 0}"> {{report.transactionAmount | currency}} </td>
             <td> {{report.transactionBalance | currency}} </td>
 
           </tr>
