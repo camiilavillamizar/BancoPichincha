@@ -48,6 +48,7 @@ public class TransactionImpl implements ITransaction{
 	
 	@Override
 	public Transaction save(Transaction transaction) throws Exception {
+		checkValidAmount(transaction);
 		BigDecimal lastBalance = getLastBalance(transaction.getAccount().getId()); 
 		BigDecimal actualBalance = sumAmountToBalance(transaction, lastBalance); 
 		transaction.setBalance(actualBalance);
@@ -55,12 +56,14 @@ public class TransactionImpl implements ITransaction{
 		if(transaction.getType() == TransactionType.DEBITO) 
 			transaction.setAmount(transaction.getAmount().multiply(new BigDecimal(-1)));
 
+		
 		return getCompleteObject(transactionDao.save(transaction));
 	}
 
 	@Override
 	public Transaction update(Transaction transaction) throws Exception {
 		checkIfExists(transaction.getId());
+		checkValidAmount(transaction); 
 		checkCanEdit(transaction);
 		transaction.setBalance(recalculateBalance(transaction));
 		return getCompleteObject(transactionDao.save(transaction)); 
@@ -74,6 +77,12 @@ public class TransactionImpl implements ITransaction{
 
 	
 	//---------- OTHER FUNCTIONS----------
+	
+	@Override
+	public void checkValidAmount(Transaction transaction) throws Exception{
+		if(transaction.getAmount().compareTo(BigDecimal.ZERO) < 0) throw new Exception("INVALID AMOUNT");
+	}
+	
 	@Override
 	public void checkIfExists(int id) throws Exception {
 		if(getById(id) == null) {
@@ -134,16 +143,26 @@ public class TransactionImpl implements ITransaction{
 		if(actualTransaction.getAmount().compareTo(transaction.getAmount()) == 0) return transaction.getBalance(); 
 		
 		BigDecimal balance = actualTransaction.getBalance(); 
-		if(transaction.getType() == TransactionType.CREDITO) {
+		if(transaction.getType() == TransactionType.CREDITO && actualTransaction.getType() == TransactionType.CREDITO) {
 			 return balance = balance.add(transaction.getAmount().subtract(actualTransaction.getAmount())); 
 		}
-		if(transaction.getType() == TransactionType.DEBITO) {; 
+		else if(transaction.getType() == TransactionType.CREDITO && actualTransaction.getType() == TransactionType.DEBITO) {
+			return balance = balance.add(transaction.getAmount().add(actualTransaction.getAmount())); 
+		}
+		else if(transaction.getType() == TransactionType.DEBITO && actualTransaction.getType() == TransactionType.DEBITO) {; 
 			 balance = balance.subtract(transaction.getAmount().subtract(actualTransaction.getAmount().abs()));
 			 if(balance.compareTo(BigDecimal.ZERO) < 0) {
 				 throw new Exception("SALDO NO DISPONIBLE");
 			 }
 			 return balance; 
 		}
+		else if(transaction.getType() == TransactionType.DEBITO && actualTransaction.getType() == TransactionType.CREDITO) {; 
+		 balance = balance.subtract(transaction.getAmount().add(actualTransaction.getAmount()));
+		 if(balance.compareTo(BigDecimal.ZERO) < 0) {
+			 throw new Exception("SALDO NO DISPONIBLE");
+		 }
+		 return balance; 
+	}
 		throw new Exception("INVALID TRANSACTION TYPE"); 
 	}
 

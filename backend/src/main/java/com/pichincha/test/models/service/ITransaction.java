@@ -15,6 +15,7 @@ public interface ITransaction {
 	public void deleteById(int id) throws Exception;
 	
 	//OTHER FUNCTIONS
+	public void checkValidAmount(Transaction transaction) throws Exception; 
 	public void checkIfExists(int id) throws Exception; 
 	public BigDecimal getLastBalance(int accountId) throws Exception; 
 	public BigDecimal sumAmountToBalance(Transaction transaction, BigDecimal lastBalance) throws Exception; 
