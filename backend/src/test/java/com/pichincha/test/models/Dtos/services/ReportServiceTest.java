@@ -51,7 +51,7 @@ public class ReportServiceTest {
 	String from;
 	String to; 
 	
-	DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd");
+	DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	
 	@BeforeEach()
 	void setUp() {
@@ -85,7 +85,7 @@ public class ReportServiceTest {
 		tomorrowCalendar.add(Calendar.DATE, 1);
 		Date tomorrowDate = tomorrowCalendar.getTime();
 		String tomorrow = dateFormat.format(tomorrowDate); 
-		
+		 
 		from = "2023-01-01"; 
 		to = tomorrow;
 			

@@ -18,13 +18,13 @@ public class ReportService {
 	@Autowired
 	ReportDtoRepository reportRepo; 
 	
-	DateFormat dateFormat = new SimpleDateFormat("yyyymmdd");  
+	DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");  
 	
 	public void checkDates(String startDate, String endDate) throws Exception{
 		
 		Date date = Calendar.getInstance().getTime();  
 		String today = dateFormat.format(date);  
-		
+	
 		endDate = endDate.replace("-", "");
 		startDate = startDate.replace("-", "");
 		

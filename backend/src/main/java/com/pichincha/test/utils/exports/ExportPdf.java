@@ -3,10 +3,12 @@ package com.pichincha.test.utils.exports;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
@@ -37,6 +39,8 @@ public class ExportPdf {
 			Font headerFont = FontFactory.getFont(FontFactory.COURIER_BOLD, 9);
 			Font font = FontFactory.getFont(FontFactory.COURIER, 9);
 			
+			Font redFont = FontFactory.getFont(FontFactory.COURIER, 9, BaseColor.RED);
+			
 			
 			for(String header: headers) {
 				PdfPCell hcell =  new PdfPCell(new Phrase(header, headerFont));
@@ -62,7 +66,12 @@ public class ExportPdf {
 				cells.add(initialBalanceCell);
 				PdfPCell accountStateCell = new PdfPCell(new Phrase(line.isAccountState() == true ? "TRUE" : "FALSE", font));
 				cells.add(accountStateCell);
-				PdfPCell amountCell = new PdfPCell(new Phrase(line.getTransactionAmount().toString(), font));
+				
+				PdfPCell amountCell;
+				if(line.getTransactionAmount().compareTo(BigDecimal.ZERO) < 0) amountCell = 
+						new PdfPCell(new Phrase(line.getTransactionAmount().toString(), redFont));
+				else amountCell = new PdfPCell(new Phrase(line.getTransactionAmount().toString(), font));
+					
 				cells.add(amountCell);
 				PdfPCell balanceCell = new PdfPCell(new Phrase(line.getTransactionBalance().toString(), font));
 				cells.add(balanceCell);
