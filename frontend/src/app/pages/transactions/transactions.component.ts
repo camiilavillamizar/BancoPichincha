@@ -176,7 +176,7 @@ export class TransactionsComponent implements OnInit {
     }, error => {
       this.deleteDone = true;
       this.loading = false; 
-      this.message = "No se ha posiso eliminar la cuenta "+ error.error; 
+      this.message = "No se ha podido eliminar la transacción "+ error.error; 
     })
   }
 

@@ -14,7 +14,6 @@ export class TitleSectionComponent implements OnInit {
   src: string = ""; 
   ngOnInit(): void {
 
-    console.log(this.page)
     switch(this.page){
       case 'client': 
             this.title = "Clientes"
